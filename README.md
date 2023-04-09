@@ -1,3 +1,24 @@
+# Chester512
+
+Chester512 is a state-of-the-art cryptographic algorithm designed to provide strong security and high performance in modern computing environments. It features a larger key and block size, dynamic S-boxes, customizable rounds, and improved resistance against quantum computing attacks.
+
+## Table of Contents
+
+1. [Features](#features)
+2. [Comparisons](#comparisons)
+3. [Usage](#usage)
+4. [Example](#example)
+
+## Features
+
+- Larger key and block size (512 bits)
+- Dynamic S-boxes
+- Customizable rounds
+- Optimized for modern processors
+- High quantum resistance
+
+## Comparisons
+
 # Security Analysis of Chester512 Cryptography
 
 ## 1. Introduction
@@ -83,6 +104,44 @@ Table 7: Additional features and resistance comparison between Chester512 and AE
 | Galois Field Multiply    | Dynamic irreducible polynomial               | Fixed irreducible polynomial          | Chester512 |
 | SubBytes                 | Based on dynamic S-box                       | Based on static S-box                 | Chester512 |
 | ShiftRows                | Adaptive shift rows based on key size        | Fixed shift rows pattern              | Chester512 |
+
+## Usage
+
+To use Chester512, follow these steps:
+
+1. Add a reference to the Chester512 library in your project.
+2. Create an instance of the Chester512 class with a generated password.
+3. Call the Encrypt and Decrypt methods to perform encryption and decryption operations.
+
+## Example
+
+Here's an example of how to use Chester512 in a C# project:
+
+```csharp
+using System;
+using System.Text;
+using Chester512;
+
+namespace Chester512Demo
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            var password = Chester512.GeneratePassword();
+            var chesterAlgorithm = new Chester512(password);
+            
+            var encrypted = Convert.ToBase64String(chesterAlgorithm.Encrypt(Encoding.UTF8.GetBytes("This is just an example of input, you can use it to encrypt documents too.")));
+            Console.WriteLine("Encrypted: " + encrypted);
+
+            var decrypted = Encoding.UTF8.GetString(chesterAlgorithm.Decrypt(Convert.FromBase64String(encrypted)));
+            Console.WriteLine("Decrypted: " + decrypted);
+        }
+    }
+}
+```
+
+
 
 ## 4. Conclusion
 
