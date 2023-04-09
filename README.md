@@ -119,10 +119,10 @@ Here's an example of how to use Chester512 in a C# project:
 
 ```csharp
 using System;
+using System.IO;
 using System.Text;
-using Chester512;
 
-namespace Chester512Demo
+namespace Chester512
 {
     internal class Program
     {
@@ -130,12 +130,17 @@ namespace Chester512Demo
         {
             var password = Chester512.GeneratePassword();
             var chesterAlgorithm = new Chester512(password);
-            
-            var encrypted = Convert.ToBase64String(chesterAlgorithm.Encrypt(Encoding.UTF8.GetBytes("This is just an example of input, you can use it to encrypt documents too.")));
-            Console.WriteLine("Encrypted: " + encrypted);
 
-            var decrypted = Encoding.UTF8.GetString(chesterAlgorithm.Decrypt(Convert.FromBase64String(encrypted)));
-            Console.WriteLine("Decrypted: " + decrypted);
+            var inputText = "This example demonstrates the encryption and decryption of text using the Chester512 algorithm.";
+
+            var inputData = Encoding.UTF8.GetBytes(inputText);
+            var encryptedData = chesterAlgorithm.Encrypt(inputData);
+            var encryptedText = Convert.ToBase64String(encryptedData);
+            Console.WriteLine("Encrypted text: " + encryptedText);
+
+            var decryptedData = chesterAlgorithm.Decrypt(encryptedData);
+            var decryptedText = Encoding.UTF8.GetString(decryptedData);
+            Console.WriteLine("Decrypted text: " + decryptedText);
         }
     }
 }
