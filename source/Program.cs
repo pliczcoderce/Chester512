@@ -1,26 +1,53 @@
 ﻿using System;
 using System.IO;
+using System.Security;
 using System.Text;
 
 namespace Chester512
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            var password = Chester512.GeneratePassword();
-            var chesterAlgorithm = new Chester512(password);
+            try
+            {
+                Console.Title = "Chester Algorithm";
+                
+                Console.Write("Input text: ");
+                var inputText = Console.ReadLine()!;
 
-            var inputText = "This example demonstrates the encryption and decryption of text using the Chester512 algorithm.";
+                Console.Write("Password: ");
+                using var securePassword = new SecureString();
+                ConsoleKeyInfo key;
+                do
+                {
+                    key = Console.ReadKey(true);
+                    if (key.Key != ConsoleKey.Enter)
+                    {
+                        securePassword.AppendChar(key.KeyChar);
+                        Console.Write("*");
+                    }
+                } while (key.Key != ConsoleKey.Enter);
+                
+                var chesterAlgorithm = new Chester512(securePassword);
+                var encryptedData = chesterAlgorithm.Encrypt(Encoding.UTF8.GetBytes(inputText));
+                var encryptedText = Convert.ToBase64String(encryptedData);
+                
+                Console.WriteLine();
+                Console.WriteLine("Encrypted text: " + encryptedText);
 
-            var inputData = Encoding.UTF8.GetBytes(inputText);
-            var encryptedData = chesterAlgorithm.Encrypt(inputData);
-            var encryptedText = Convert.ToBase64String(encryptedData);
-            Console.WriteLine("Encrypted text: " + encryptedText);
-
-            var decryptedData = chesterAlgorithm.Decrypt(encryptedData);
-            var decryptedText = Encoding.UTF8.GetString(decryptedData);
-            Console.WriteLine("Decrypted text: " + decryptedText);
+                var decryptedData = chesterAlgorithm.Decrypt(encryptedData);
+                Console.WriteLine("Decrypted text: " + Encoding.UTF8.GetString(decryptedData));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                Console.WriteLine();
+                Main();
+            }
         }
     }
 }

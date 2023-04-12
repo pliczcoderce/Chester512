@@ -1,4 +1,7 @@
-﻿using System.Security.Cryptography;
+﻿using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Chester512
 {
@@ -34,6 +37,30 @@ namespace Chester512
         /// <param name="key">The encryption key.</param>
         public Chester512(byte[] key)
         {
+            if (key.Length != 64)
+            {
+                throw new ArgumentException("Key must have 64 characters");
+            }
+
+            _key = key;
+            _dynamicSBox = GenerateDynamicSBox(_key);
+            _expandedKey = KeyExpansion(_key);
+            _irreduciblePoly = DeriveIrreduciblePoly(_dynamicSBox);
+
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                PrintDynamicSBox();
+                PrintExpandedKeys();
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the Chester512 class with the specified key.
+        /// </summary>
+        /// <param name="key">The encryption key.</param>
+        public Chester512(SecureString secureKey)
+        {
+            var key = SecureStringToByteArray(secureKey);
             if (key.Length != 64)
             {
                 throw new ArgumentException("Key must have 64 characters");
@@ -161,6 +188,37 @@ namespace Chester512
         }
 
         /// <summary>
+        /// Converts a SecureString to a byte array.
+        /// </summary>
+        /// <returns>The byte array.</returns>
+        private static byte[] SecureStringToByteArray(SecureString securePassword)
+        {
+            var unmanagedString = IntPtr.Zero;
+            try
+            {
+                unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(securePassword);
+                var passwordLength = securePassword.Length;
+
+                var passwordBytesList = new List<byte>();
+
+                for (int i = 0; i < passwordLength; i++)
+                {
+                    char currentChar = Marshal.PtrToStringUni(unmanagedString + i * 2, 1)[0];
+                    byte[] currentCharBytes = Encoding.UTF8.GetBytes(new char[] { currentChar });
+
+                    passwordBytesList.AddRange(currentCharBytes);
+                }
+
+                return passwordBytesList.ToArray();
+            }
+            finally
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
+            }
+        }
+
+
+        /// <summary>
         /// Generates a secure password.
         /// </summary>
         /// <returns>The password byte array.</returns>
@@ -219,7 +277,6 @@ namespace Chester512
         {
             int blockSize = 64;
             byte[][] expandedKey = new byte[NumberOfRounds + 1][];
-
 
             for (int i = 0; i <= NumberOfRounds; i++)
             {
